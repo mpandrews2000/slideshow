@@ -25,9 +25,37 @@ render: function(output) {
 	var matcher = /img src="([^"]+)/;
 	var match = matcher.exec(itemStr);
 	var imgURL = match[1];
+	var link = $(item).find('link').text();
+	
+	window.tumblrimgload = function(evt) {
+		var img = evt.currentTarget;
+		
+		// what's the size of this image and it's parent
+		var w = $(img).width();
+		var h = $(img).height();
+		var tw = $(img).parent().parent().width();
+		var th = $(img).parent().parent().height();
+		
+		// compute the new size and offsets
+		var wscale = tw/w;
+		var hscale = th/h;
+		var scale = Math.min(wscale,hscale);
+		
+		var iw = w * scale;
+		var ih = h * scale;
+		
+		// adjust the image coordinates and size
+		var xoff = (tw - iw)/2;
+		var yoff = (th - ih)/2;
+		
+		img.width = iw;
+		img.height = ih;
+		$(img).css("left", xoff);
+		$(img).css("top", yoff);
+	}
 	
 	if (item) {
-		return "<div id=widget><div id=theImg><img src=\""+imgURL+"\"/></div></div>";
+		return "<div id=widget><div id=theImg><a href=\""+link+"\"><img src=\""+imgURL+"\" onload=\"window.tumblrimgload(event);\"/></a></div></div>";
 
 	} else
 	{
@@ -55,8 +83,5 @@ position:absolute;\n\
 }\n\
 #theImg img\n\
 {\n\
-	max-width:100%;\n\
-	max-height:100%;\n\
-margin:auto;\n\
-display:block;\n\
+position:relative;\n\
 }"
